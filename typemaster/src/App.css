@@ -334,21 +334,31 @@ input:checked+.slider:before {
   display: flex;
   align-items: center; justify-content: center;
   z-index: 120;
-  background: rgba(17,27,34, 0.26);
+  background: linear-gradient(116deg, #1a75ed0b 24%, #ff970012 82%);
+  animation: fadeBg .66s;
+}
+@keyframes fadeBg {
+  from { background: transparent;}
+  to   { background: linear-gradient(116deg, #1a75ed0b 24%, #ff970012 82%);}
 }
 .test-result-modal-content {
   min-width: 240px;
   max-width: 86vw;
-  background: var(--card-bg);
+  background: var(--profile-gradient);
   padding: 36px 32px;
-  border-radius: 8px;
+  border-radius: 13px;
   text-align: center;
-  font-size: 1.15rem;
-  box-shadow: var(--shadow);
+  font-size: 1.18rem;
+  box-shadow: 0 7px 42px 0 #1976d232;
+  border: 2px solid var(--border-color);
+  animation: fadePopIn .38s;
 }
 .test-result-modal-content h4 {
   color: var(--primary);
   margin-bottom: 24px;
+  font-size: 1.42em;
+  font-weight: 900;
+  text-shadow: 0 3px 16px #ffeebb80;
 }
 
 /* ========== AUTH ========== */
