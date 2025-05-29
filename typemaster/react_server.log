@@ -36,3 +36,39 @@ ERROR in ./src/App.js 13:0-103
 Module not found: Error: Can't resolve 'react-router-dom' in '/home/kavia/workspace/code-generation/typemaster-103527-2c5dd3ce/typemaster/src'
 
 webpack compiled with 1 error and 1 warning
+Compiling...
+Failed to compile.
+
+Module not found: Error: Can't resolve 'react-router-dom' in '/home/kavia/workspace/code-generation/typemaster-103527-2c5dd3ce/typemaster/src'
+WARNING in [eslint] 
+src/App.js
+  Line 12:10:   'randomId' is defined but never used                                                                      no-unused-vars
+  Line 16:10:   'getToday' is defined but never used                                                                      no-unused-vars
+  Line 39:10:   'saveTestTexts' is defined but never used                                                                 no-unused-vars
+  Line 65:10:   'isLoggedIn' is defined but never used                                                                    no-unused-vars
+  Line 89:10:   'getUserRole' is defined but never used                                                                   no-unused-vars
+  Line 256:10:  'startTime' is assigned a value but never used                                                            no-unused-vars
+  Line 269:6:   React Hook useEffect has a missing dependency: 'timer'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+ERROR in ./src/App.js 13:0-103
+Module not found: Error: Can't resolve 'react-router-dom' in '/home/kavia/workspace/code-generation/typemaster-103527-2c5dd3ce/typemaster/src'
+
+webpack compiled with 1 error and 1 warning
+Compiling...
+Failed to compile.
+
+Module not found: Error: Can't resolve 'react-router-dom' in '/home/kavia/workspace/code-generation/typemaster-103527-2c5dd3ce/typemaster/src'
+WARNING in [eslint] 
+src/App.js
+  Line 12:10:   'randomId' is defined but never used                                                                      no-unused-vars
+  Line 16:10:   'getToday' is defined but never used                                                                      no-unused-vars
+  Line 39:10:   'saveTestTexts' is defined but never used                                                                 no-unused-vars
+  Line 65:10:   'isLoggedIn' is defined but never used                                                                    no-unused-vars
+  Line 89:10:   'getUserRole' is defined but never used                                                                   no-unused-vars
+  Line 256:10:  'startTime' is assigned a value but never used                                                            no-unused-vars
+  Line 269:6:   React Hook useEffect has a missing dependency: 'timer'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+ERROR in ./src/App.js 13:0-103
+Module not found: Error: Can't resolve 'react-router-dom' in '/home/kavia/workspace/code-generation/typemaster-103527-2c5dd3ce/typemaster/src'
+
+webpack compiled with 1 error and 1 warning
