@@ -402,7 +402,10 @@ const PERIODS = [
   { key: "all", label: "All Time" }
 ];
 
-// PUBLIC_INTERFACE
+/**
+ * PUBLIC_INTERFACE
+ * Enhance LeaderboardPage: User icon, accent icons, bolder user, highlight top row.
+ */
 function LeaderboardPage() {
   const [period, setPeriod] = useState("today");
   const [data, setData] = useState([]);
@@ -442,6 +445,21 @@ function LeaderboardPage() {
     setData(filtered.slice(0, 10));
   }, [period]);
 
+  function leaderAvatar(username) {
+    return (
+      <span className="profile-avatar" style={{
+        display: "inline-flex", marginRight: 7, width: 30, height: 30, fontSize: "1.2em", border: 0, boxShadow: "none", borderRadius: "50%"
+      }}>{username?.trim()?.charAt(0).toUpperCase() || "🤖"}</span>
+    );
+  }
+
+  function leaderIcon(idx) {
+    if(idx===0) return <span className="icon-cell" title="Top performer">🏆</span>;
+    if(idx===1) return <span className="icon-cell" title="2nd">🥈</span>;
+    if(idx===2) return <span className="icon-cell" title="3rd">🥉</span>;
+    return <span className="icon-cell" title="Participant">⌨️</span>;
+  }
+
   return (
     <div className="leaderboard-container">
       <h2>Leaderboard</h2>
@@ -460,6 +478,7 @@ function LeaderboardPage() {
         <table className="leaderboard-table">
           <thead>
             <tr>
+              <th className="icon-cell"></th>
               <th>#</th>
               <th>User</th>
               <th>WPM</th>
@@ -470,15 +489,19 @@ function LeaderboardPage() {
           <tbody>
             {data.length === 0 && (
               <tr>
-                <td colSpan={5} style={{ textAlign: "center" }}>
+                <td colSpan={6} style={{ textAlign: "center" }}>
                   No scores yet!
                 </td>
               </tr>
             )}
             {data.map((row, idx) => (
-              <tr key={row.username + idx}>
+              <tr key={row.username + idx} style={idx === 0 ? {background: "var(--stat-accent1)", fontWeight: "bold"} : {}}>
+                <td className="icon-cell">{leaderIcon(idx)}</td>
                 <td>{idx + 1}</td>
-                <td>{row.username}</td>
+                <td style={{ fontWeight: 700, color: "var(--primary)" }}>
+                  {leaderAvatar(row.username)}
+                  {row.username}
+                </td>
                 <td>{row.wpm}</td>
                 <td>{row.accuracy}%</td>
                 <td>{(new Date(row.timestamp)).toLocaleString()}</td>
@@ -497,10 +520,31 @@ function average(arr) {
   return Math.round(arr.reduce((a, b) => a + b, 0) / arr.length);
 }
 
-// PUBLIC_INTERFACE
+/**
+ * PUBLIC_INTERFACE
+ * Enhanced ProfilePage: avatar, bold colorful stats, icons, animated stats, updated meta layout.
+ */
 function ProfilePage() {
   const { user, setUser } = React.useContext(AuthContext);
   const [confirm, setConfirm] = useState(false);
+
+  // Animated stat value counter
+  function useAnimatedNumber(n, duration=500) {
+    const [val, setVal] = useState(n);
+    useEffect(() => {
+      let start = val, end = n, startTime;
+      if (start === end) return;
+      function animate(ts) {
+        if (!startTime) startTime = ts;
+        let prog = Math.min((ts-startTime)/(duration), 1);
+        setVal(start + Math.round((end-start)*prog));
+        if (prog < 1) requestAnimationFrame(animate);
+      }
+      requestAnimationFrame(animate);
+      // eslint-disable-next-line
+    }, [n]);
+    return val;
+  }
 
   if (!user) return <Navigate to="/login" />;
 
@@ -508,21 +552,63 @@ function ProfilePage() {
   const avgWpm = average(tests.map(t => t.wpm));
   const avgAcc = average(tests.map(t => t.accuracy));
 
+  // Avatar: use first letter or emoji, fallback
+  const avatar = (
+    <span className="profile-avatar" title={user.username}>
+      {user.username?.trim()?.charAt(0).toUpperCase() || "👤"}
+    </span>
+  );
+
   function handleDelete() {
     deleteTestHistory(user.username);
     const users = loadUsers();
     setUser({ ...users[user.username] });
     setConfirm(false);
   }
+
+  // Stat icon helpers
+  const StatIcon = ({ type }) => {
+    if(type==="wpm") return <span className="profile-stat-icon" title="Average WPM">🚀</span>;
+    if(type==="acc") return <span className="profile-stat-icon" title="Average Accuracy">🎯</span>;
+    if(type==="tests") return <span className="profile-stat-icon" title="Tests Taken">⏳</span>;
+    return <span className="profile-stat-icon">📄</span>;
+  };
+  const animatedTests = useAnimatedNumber(tests.length, 500);
+  const animatedWpm = useAnimatedNumber(avgWpm || 0, 900);
+  const animatedAcc = useAnimatedNumber(avgAcc || 0, 900);
+
   return (
     <div className="profile-container">
       <h2>Your Profile</h2>
-      <div className="profile-meta">
-        <div>Username: <b>{user.username}</b></div>
+      <div className="profile-meta" style={{ alignItems: "center" }}>
+        {avatar}
+        <div>
+          Username: <b>{user.username}</b>
+        </div>
         <div>Role: {user.role}</div>
-        <div>Total Tests: {tests.length}</div>
-        <div>Average WPM: {avgWpm || "-"}</div>
-        <div>Average Accuracy: {avgAcc || "-"}%</div>
+      </div>
+      <div className="profile-stats-row">
+        <div className="profile-stat-block">
+          <div className="profile-stat-label">Total Tests</div>
+          <div className="profile-stat-value">
+            <StatIcon type="tests" />
+            <span>{animatedTests}</span>
+          </div>
+        </div>
+        <div className="profile-stat-block">
+          <div className="profile-stat-label">Avg WPM</div>
+          <div className="profile-stat-value">
+            <StatIcon type="wpm" />
+            <span>{animatedWpm || "-"}</span>
+          </div>
+        </div>
+        <div className="profile-stat-block">
+          <div className="profile-stat-label">Avg Accuracy</div>
+          <div className="profile-stat-value">
+            <StatIcon type="acc" />
+            <span>{animatedAcc || "-"}%</span>
+          </div>
+        </div>
       </div>
       <h3>Test History</h3>
       {tests.length === 0 && <div>No test results yet.</div>}
@@ -531,6 +617,7 @@ function ProfilePage() {
           <table className="profile-table">
             <thead>
               <tr>
+                <th className="icon-cell"></th>
                 <th>#</th>
                 <th>WPM</th>
                 <th>Accuracy</th>
@@ -541,6 +628,7 @@ function ProfilePage() {
             <tbody>
               {tests.slice().reverse().map((test, idx) => (
                 <tr key={test.timestamp + idx}>
+                  <td className="icon-cell" title="Test">{idx === 0 ? "⭐" : "⌨️"}</td>
                   <td>{tests.length - idx}</td>
                   <td>{test.wpm}</td>
                   <td>{test.accuracy}%</td>
