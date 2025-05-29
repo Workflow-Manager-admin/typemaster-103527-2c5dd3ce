@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { BrowserRouter as Router, Route, Routes, Navigate, Link, useNavigate } from "react-router-dom";
 import "./App.css";
 import "./index.css";
@@ -112,8 +112,10 @@ function useDarkMode() {
 // ======= CONTEXT =======
 const AuthContext = React.createContext(null);
 
-// ======= NAVBAR =======
-function Navbar({ user, onLogout, darkMode, setDarkMode }) {
+/**
+ * Navbar: Accepts new props for sound toggle
+ */
+function Navbar({ user, onLogout, darkMode, setDarkMode, soundEnabled, setSoundEnabled }) {
   return (
     <nav className="navbar">
       <div className="container nav-flex">
@@ -140,8 +142,9 @@ function Navbar({ user, onLogout, darkMode, setDarkMode }) {
               <Link to="/signup" className="btn btn-highlight">Sign Up</Link>
             </>
           )}
+          {/* SOUND TOGGLE */}
           <span className="dark-toggle" style={{ marginLeft: 12 }}>
-            <label className="switch">
+            <label className="switch" title="Toggle Dark/Light">
               <input
                 type="checkbox"
                 checked={darkMode}
@@ -150,6 +153,21 @@ function Navbar({ user, onLogout, darkMode, setDarkMode }) {
               <span className="slider round"></span>
             </label>
             <span style={{ marginLeft: 4, fontSize: 16 }}>{darkMode ? "🌙" : "🌞"}</span>
+          </span>
+          {/* Global Sound Toggle */}
+          <span className="dark-toggle" style={{ marginLeft: 12 }} title="Toggle Sound">
+            <label className="switch">
+              <input
+                type="checkbox"
+                checked={soundEnabled}
+                onChange={e => setSoundEnabled(e.target.checked)}
+                aria-label="Sound On/Off"
+              />
+              <span className="slider round"></span>
+            </label>
+            <span style={{ marginLeft: 4, fontSize: 16 }}>
+              {soundEnabled ? "🔊" : "🔇"}
+            </span>
           </span>
         </div>
       </div>
