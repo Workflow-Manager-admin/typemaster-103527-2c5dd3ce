@@ -546,11 +546,17 @@ function ProfilePage() {
     return val;
   }
 
-  if (!user) return <Navigate to="/login" />;
-
-  const tests = user.tests || [];
+  // Move hooks and derived values before any early return
+  const tests = user && user.tests ? user.tests : [];
   const avgWpm = average(tests.map(t => t.wpm));
   const avgAcc = average(tests.map(t => t.accuracy));
+
+  // Always call before any conditionally returning JSX
+  const animatedTests = useAnimatedNumber(tests.length, 500);
+  const animatedWpm = useAnimatedNumber(avgWpm || 0, 900);
+  const animatedAcc = useAnimatedNumber(avgAcc || 0, 900);
+
+  if (!user) return <Navigate to="/login" />;
 
   // Avatar: use first letter or emoji, fallback
   const avatar = (
@@ -573,9 +579,6 @@ function ProfilePage() {
     if(type==="tests") return <span className="profile-stat-icon" title="Tests Taken">⏳</span>;
     return <span className="profile-stat-icon">📄</span>;
   };
-  const animatedTests = useAnimatedNumber(tests.length, 500);
-  const animatedWpm = useAnimatedNumber(avgWpm || 0, 900);
-  const animatedAcc = useAnimatedNumber(avgAcc || 0, 900);
 
   return (
     <div className="profile-container">
