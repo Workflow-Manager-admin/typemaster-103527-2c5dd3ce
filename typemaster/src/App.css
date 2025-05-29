@@ -174,34 +174,60 @@ body {
 .switch {
   position: relative;
   display: inline-block;
-  width: 34px;
-  height: 20px;
+  width: 44px;
+  height: 25px;
+  vertical-align: middle;
 }
 .switch input {opacity: 0; width: 0; height: 0;}
 .slider {
   position: absolute;
   cursor: pointer;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-color: #eee;
-  transition: .2s;
-  border-radius: 20px;
+  background-color: #ececec;
+  transition: background .36s cubic-bezier(.7,0,.25,1);
+  border-radius: 25px;
+  box-shadow: 0 2px 10px #fbe2c422, 0 1px 4px #c6d4f968;
 }
 .slider:before {
   position: absolute;
   content: "";
-  height: 14px; width: 14px;
-  left: 3px; bottom: 3px;
-  background-color: #1976d2;
-  transition: .2s;
+  height: 17px; width: 17px;
+  left: 3.5px; bottom: 3.5px;
+  background-color: #fffbe7;
+  transition: background .18s, transform .33s;
   border-radius: 50%;
+  box-shadow: 0 2px 10px #ffe2bc38;
+  z-index: 2;
 }
+
 input:checked+.slider {
-  background-color: #222;
+  background-color: #29335c;
+  box-shadow: 0 3px 16px #1a2129cf, 0 1px 4px #fbe2c410;
 }
 input:checked+.slider:before {
   background: #ffaa00;
-  transform: translateX(14px);
+  transform: translateX(16px) scale(1.06) rotate(20deg);
+  box-shadow: 0 2px 12px #ffb56644, 0 1px 4px #292c18cc;
 }
+
+.dark-toggle {
+  display: inline-flex;
+  align-items: center;
+  transition: filter .2s;
+  filter: drop-shadow(0 2px 10px #ffaa0030);
+  user-select: none;
+  font-family: emoji, Arial, sans-serif;
+}
+.dark-toggle:hover .slider:before {
+  filter: brightness(1.3) drop-shadow(0 0 5px #ffeebb88);
+}
+.dark-toggle span:last-child {
+  font-size: 18px;
+  margin-left: 7px;
+  filter: drop-shadow(0 2px 2px #dbe0ee28);
+  transition: color .19s;
+}
+
 
 /* Containers */
 .container {
@@ -227,10 +253,12 @@ input:checked+.slider:before {
 }
 .type-title {
   text-align: center;
-  font-size: 2.2rem;
-  font-weight: 600;
+  font-size: 2.4rem;
+  font-weight: 900;
   margin: 8px 0 22px;
+  letter-spacing: .016em;
   color: var(--primary);
+  text-shadow: 0 2px 14px #1a76d238,0 1px 0 #fffdfd33;
 }
 .typingtest-container {
   width: 100%;
