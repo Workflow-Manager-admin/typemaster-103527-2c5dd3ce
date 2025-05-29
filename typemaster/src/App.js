@@ -682,7 +682,7 @@ function ProfilePage() {
 }
 
 // ======= APP ROOT =======
-function HomeTestContainer() {
+function HomeTestContainer({ soundEnabled }) {
   const { user, setUser } = React.useContext(AuthContext);
   const [testResult, setTestResult] = useState(null);
   const [showStats, setShowStats] = useState(false);
@@ -703,7 +703,7 @@ function HomeTestContainer() {
   return (
     <div className="maincenter">
       <h1 className="type-title">Test your Typing Skills!</h1>
-      <TypingTest onComplete={onTestComplete} />
+      <TypingTest onComplete={onTestComplete} soundEnabled={soundEnabled} />
       {showStats && testResult && (
         <div className="aftertest-modal">
           <div className="test-result-modal-content">
@@ -724,21 +724,37 @@ function App() {
   const [darkMode, setDarkMode] = useDarkMode();
   const [user, setUser] = useState(getSession());
 
+  // Sound: global toggle, persistent in localStorage
+  const SOUND_KEY = "tm_soundEnabled";
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    const saved = localStorage.getItem(SOUND_KEY);
+    return saved == null ? true : JSON.parse(saved);
+  });
+  useEffect(() => {
+    localStorage.setItem(SOUND_KEY, JSON.stringify(soundEnabled));
+  }, [soundEnabled]);
+
   function handleLogout() {
     setUser(null);
     clearSession();
   }
 
   // Responsive nav collapse for mobile (handled by CSS)
-
   return (
     <AuthContext.Provider value={{ user, setUser }}>
       <Router>
         <div className={`app${darkMode ? " dark" : ""}`}>
-          <Navbar user={user} onLogout={handleLogout} darkMode={darkMode} setDarkMode={setDarkMode} />
+          <Navbar
+            user={user}
+            onLogout={handleLogout}
+            darkMode={darkMode}
+            setDarkMode={setDarkMode}
+            soundEnabled={soundEnabled}
+            setSoundEnabled={setSoundEnabled}
+          />
           <main className="main-content">
             <Routes>
-              <Route path="/" element={<HomeTestContainer />} />
+              <Route path="/" element={<HomeTestContainer soundEnabled={soundEnabled} />} />
               <Route path="/login" element={user ? <Navigate to="/" /> : <LoginPage />} />
               <Route path="/signup" element={user ? <Navigate to="/" /> : <SignupPage />} />
               <Route path="/leaderboard" element={<LeaderboardPage />} />
