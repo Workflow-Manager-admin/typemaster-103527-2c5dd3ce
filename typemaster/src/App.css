@@ -364,9 +364,171 @@ input:checked+.slider:before {
   max-width: 900px;
   margin: 40px auto 0 auto;
   padding: 24px 15px;
-  background: var(--card-bg);
-  border-radius: 11px;
-  box-shadow: var(--shadow);
+  background: var(--profile-gradient);
+  border-radius: 16px;
+  box-shadow: var(--profile-shadow);
+  animation: fadePopIn .61s cubic-bezier(.3,1.4,.2,1) both;
+  position: relative;
+  overflow: visible;
+}
+@keyframes fadePopIn {
+  0% { opacity: 0; transform: translateY(25px) scale(.97);}
+  50% { opacity:.8;}
+  100% { opacity: 1; transform: translateY(0) scale(1);}
+}
+
+.profile-container {
+  border: 1.7px solid var(--border-color);
+}
+
+.leaderboard-container h2,
+.profile-container h2, .profile-container h3 {
+  font-weight: 800;
+  letter-spacing: .02em;
+  color: var(--primary);
+  text-shadow:
+    0 2px 8px #ffdfadd0,
+    0 1px 0 #fff6aa44;
+}
+
+.profile-meta {
+  margin-bottom: 23px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 23px;
+  font-size: 1.14rem;
+  align-items: stretch;
+}
+
+.profile-meta > div,
+.profile-stat-accent {
+  background: var(--stat-accent3);
+  box-shadow: 0 2px 16px 0 rgba(33,90,245,0.05);
+  padding: 11px 22px 11px 14px;
+  border-radius: 9px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  font-size: 1.12em;
+  gap: 0.6em;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  margin-bottom: 3px;
+  transition: box-shadow .22s, background .22s;
+  position: relative;
+}
+.profile-meta > div b {
+  font-size: 1.12em;
+  color: var(--primary);
+  font-weight: 900;
+  text-shadow: 0 2px 8px #fff6,0 1px 0 #1a1a1a10;
+}
+.profile-meta > div.profile-stat-highlight {
+  background: var(--stat-accent1);
+  box-shadow: 0 5px 30px 0 var(--stat-accent1), 0 2px 12px 0 rgba(255,152,0,0.08);
+  border-left: 4px solid var(--accent);
+}
+
+.profile-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg,#fff8ba 35%,#fb8d6b 100%);
+  box-shadow: 0 4px 18px 0 #eebb4355;
+  margin-right: 12px;
+  border: 2.7px solid #faecbd;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2.48em;
+  font-weight: bold;
+  color: #ee7a35;
+  user-select: none;
+}
+[data-theme="dark"] .profile-avatar {
+  background: linear-gradient(135deg,#312c12 32%,#ba6e1b 100%);
+  color: #ffaa00;
+  border: 2.5px solid #2a2330;
+  box-shadow: 0 5px 18px 0 #fbc44422;
+}
+
+.profile-stats-row {
+  display: flex;
+  gap: 19px;
+  margin-bottom: 17px;
+  align-items: stretch;
+}
+.profile-stat-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 110px;
+  flex: 1;
+  background: var(--stat-accent2);
+  border-radius: 8px;
+  padding: 12px 11px 12px 24px;
+  box-shadow: 0 2px 18px 0 rgba(255,188,0,0.08);
+  margin-right: 7px;
+  margin-bottom: 4px;
+  border: 1.2px solid var(--border-color);
+  position: relative;
+  overflow: visible;
+}
+.profile-stat-block:last-child {
+  margin-right: 0;
+}
+.profile-stat-label {
+  color: var(--text-secondary);
+  font-size: .97em;
+  margin-bottom: 7px;
+  font-weight: 700;
+}
+.profile-stat-value {
+  font-weight: 900;
+  font-size: 1.44em;
+  color: var(--accent);
+  letter-spacing: .03em;
+  text-shadow: 0 1px 9px #ff980020;
+  display: flex;
+  align-items: center;
+  min-height: 2em;
+  gap: 7px;
+  animation: statPopGrow 0.86s cubic-bezier(.23,1.4,.24,1) backwards;
+  transition: color .18s;
+}
+@keyframes statPopGrow {
+  from {
+    transform: scale(0.4) translateY(22px);
+    opacity: 0;
+  }
+  90% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+.profile-stat-icon {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--stat-icon-bg);
+  box-shadow: 0 0 12px var(--stat-icon-bg);
+  font-size: 1.22em;
+  display: flex; align-items: center; justify-content: center;
+  margin-right: 6px;
+  color: var(--stat-icon);
+  border: 1.2px solid #ff980010;
+  margin-left: -26px;
+  margin-top: -3px;
+}
+
+.profile-actions {
+  gap: 13px;
+  align-items: center;
+  margin-bottom: 11px;
 }
 .leaderboard-periods {
   display: flex;
