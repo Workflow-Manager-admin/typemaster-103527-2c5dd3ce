@@ -404,6 +404,9 @@ input:checked+.slider:before {
   font-weight: 900;
   text-shadow: 0 3px 16px #ffeebb80;
 }
+.test-result-modal-content .motivate-text {
+  color: #26a26a; font-weight: 600; font-size: 1.18em; margin: 14px 1px 14px 1px;
+}
 
 /* ========== AUTH ========== */
 .auth-container {

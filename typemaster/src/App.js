@@ -264,13 +264,13 @@ function getRandomTestText() {
 }
 
 /** 
- * TypingTest - Enhanced to provide audio feedback on:
- * - Soft tap on keystroke
- * - Error buzzer when mistake made
- * - Chime on test completion
- * - Honors global soundEnabled
+ * TypingTest - Enhanced to provide audio feedback and new UI features:
+ * - Displays animated progress ring/bar during the test
+ * - Shows avatars for users (if available)
+ * - "Share Score" button on result
+ * - End-of-test motivational feedback modal
  */
-function TypingTest({ onComplete, soundEnabled }) {
+function TypingTest({ onComplete, soundEnabled, username }) {
   const [testText, setTestText] = useState(getRandomTestText());
   const [started, setStarted] = useState(false);
   const [input, setInput] = useState("");
@@ -284,6 +284,48 @@ function TypingTest({ onComplete, soundEnabled }) {
   const tapRef = useRef(null);
   const chimeRef = useRef(null);
   const buzzerRef = useRef(null);
+
+  // Modal state for end-summary
+  const [showSummary, setShowSummary] = useState(false);
+  const [lastResult, setLastResult] = useState(null);
+
+  // PUBLIC_INTERFACE: Share score
+  const handleShareScore = useCallback(() => {
+    if (!lastResult) return;
+    const shareText = `My Typing Test Result: ${lastResult.wpm} WPM, ${lastResult.accuracy}% accuracy on typemaster! 🚀`;
+    if (navigator.share) {
+      navigator.share({
+        title: "TypeMaster Typing Test Result",
+        text: shareText,
+        url: window.location.href
+      });
+    } else {
+      // fallback: copy to clipboard
+      navigator.clipboard.writeText(shareText);
+      alert("Score copied! Share it anywhere!");
+    }
+  }, [lastResult]);
+
+  // Helper for encouraging feedback
+  function getFeedbackMsg(res) {
+    if (!res) return "";
+    if (res.accuracy > 97 && res.wpm > 75) {
+      return "🔥 Amazing! You're a typing maestro!";
+    }
+    if (res.accuracy > 90 && res.wpm > 55) {
+      return "Great job! Smooth and fast typing!";
+    }
+    if (res.accuracy > 70) {
+      return "Solid accuracy! Keep going!";
+    }
+    if (res.wpm > 70) {
+      return "Super fast typing!";
+    }
+    if (res.accuracy < 60) {
+      return "Keep practicing, you'll improve quickly!";
+    }
+    return "Nice work! Practice makes perfect.";
+  }
 
   const playSound = useCallback((type) => {
     if (!soundEnabled) return;
@@ -327,11 +369,18 @@ function TypingTest({ onComplete, soundEnabled }) {
     // eslint-disable-next-line
   }, [started, timeLeft, done]);
   
-  // Play chime on completion
+  // Play chime & show summary on completion
   useEffect(() => {
     if (done && started) {
       playSound("chime");
       const stats = calculateStats(testText, input, 60 - timeLeft);
+      setLastResult({
+        ...stats,
+        testText,
+        timestamp: new Date().toISOString(),
+        duration: 60 - timeLeft
+      });
+      setTimeout(() => setShowSummary(true), 450); // modal after slight delay
       onComplete && onComplete({
         ...stats,
         testText,
@@ -371,6 +420,8 @@ function TypingTest({ onComplete, soundEnabled }) {
     setTimeLeft(60);
     setStarted(false);
     setStartTime(null);
+    setShowSummary(false);
+    setLastResult(null);
     inputRef.current && inputRef.current.focus();
   }
 
@@ -391,12 +442,74 @@ function TypingTest({ onComplete, soundEnabled }) {
     };
   }
 
+  // Progress ring component
+  const ProgressRing = ({ elapsed, total }) => {
+    const R = 28, C = 2 * Math.PI * R;
+    const progress = Math.max(0, Math.min(1, elapsed / total));
+    return (
+      <svg width="65" height="65" style={{ transform: "rotate(-90deg)" }}>
+        <circle
+          cx="32.5"
+          cy="32.5"
+          r={R}
+          fill="none"
+          stroke="#ececec"
+          strokeWidth="6"
+        />
+        <circle
+          cx="32.5"
+          cy="32.5"
+          r={R}
+          fill="none"
+          stroke="#1976d2"
+          strokeWidth="6"
+          strokeDasharray={C}
+          strokeDashoffset={C * (1.0 - progress)}
+          style={{ transition: "stroke-dashoffset 0.5s" }}
+        />
+        <text
+          x="32.5"
+          y="38"
+          textAnchor="middle"
+          fontSize="1.27em"
+          fill="#1976d2"
+          style={{ fontWeight: "bold", fontFamily: "Menlo, monospace" }}
+        >
+          {total - elapsed}s
+        </text>
+      </svg>
+    );
+  };
+
+  // User avatar helper for test header
+  function userAvatar(name) {
+    // fallback to emoji if no name
+    return (
+      <span className="profile-avatar" style={{
+        display: "inline-flex", marginRight: 8, width: 36, height: 36, fontSize: "1.5em", border: 0, boxShadow: "none", borderRadius: "50%"
+      }}>{name?.trim()?.charAt(0).toUpperCase() || "🤖"}</span>
+    );
+  }
+
   return (
     <div className="typingtest-container">
-      {/* Audio elements; will not be visible */}
       <audio src="/sound-tap.mp3" preload="auto" ref={tapRef} />
       <audio src="/sound-chime.mp3" preload="auto" ref={chimeRef} />
       <audio src="/sound-buzzer.mp3" preload="auto" ref={buzzerRef} />
+
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8, gap: 6
+      }}>
+        {username && (
+          <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            {userAvatar(username)}
+            <b style={{ color: "#1976d2" }}>{username}</b>
+          </span>
+        )}
+        <span style={{ flex: 1 }} />
+        {/* Progress ring shows time left visually */}
+        <ProgressRing elapsed={60 - timeLeft} total={60} />
+      </div>
 
       <TestStats
         testText={testText}
@@ -429,8 +542,31 @@ function TypingTest({ onComplete, soundEnabled }) {
         <button className="btn" onClick={handleRestart}>
           {done ? "Restart" : "Reset"}
         </button>
+        {/* Share button displayed in result/summary modal, not here */}
       </div>
-      {done && (
+
+      {done && showSummary && lastResult && (
+        <div className="aftertest-modal">
+          <div className="test-result-modal-content">
+            <h4>Your Results</h4>
+            <div>WPM: <b>{lastResult.wpm}</b></div>
+            <div>Accuracy: <b>{lastResult.accuracy}%</b></div>
+            <div>Time Taken: <b>{lastResult.duration}s</b></div>
+            <div style={{ margin: "16px 0", color: "#26a26a", fontWeight: 600, fontSize: "1.18em" }}>
+              {getFeedbackMsg(lastResult)}
+            </div>
+            <div style={{ margin: "12px 0" }}>
+              <button className="btn" style={{ marginRight: 7 }} onClick={handleRestart}>Try Again</button>
+              <button className="btn btn-outline" onClick={() => setShowSummary(false)}>Close</button>
+              <button className="btn btn-accent" style={{ marginLeft: 8 }} onClick={handleShareScore}>
+                Share Score
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {done && !showSummary && (
         <div className="aftertest-message">
           <span>Test completed!</span>
         </div>
@@ -745,37 +881,22 @@ function ProfilePage() {
 // ======= APP ROOT =======
 function HomeTestContainer({ soundEnabled }) {
   const { user, setUser } = React.useContext(AuthContext);
-  const [testResult, setTestResult] = useState(null);
-  const [showStats, setShowStats] = useState(false);
-
+  // Result/modal no longer required, handled in TypingTest summary modal
   function onTestComplete(res) {
-    setTestResult(res);
-    setShowStats(true);
     if (user) {
       addScoreToUser(user.username, res);
       const users = loadUsers();
       setUser({ ...users[user.username] }); // update context
     }
   }
-  function handleCloseStats() {
-    setShowStats(false);
-    setTestResult(null);
-  }
   return (
     <div className="maincenter">
       <h1 className="type-title">Test your Typing Skills!</h1>
-      <TypingTest onComplete={onTestComplete} soundEnabled={soundEnabled} />
-      {showStats && testResult && (
-        <div className="aftertest-modal">
-          <div className="test-result-modal-content">
-            <h4>Your Results</h4>
-            <div>WPM: <b>{testResult.wpm}</b></div>
-            <div>Accuracy: <b>{testResult.accuracy}%</b></div>
-            <div>Time Taken: <b>{testResult.duration}s</b></div>
-            <button className="btn" onClick={handleCloseStats}>Close</button>
-          </div>
-        </div>
-      )}
+      <TypingTest
+        onComplete={onTestComplete}
+        soundEnabled={soundEnabled}
+        username={user?.username}
+      />
     </div>
   );
 }
