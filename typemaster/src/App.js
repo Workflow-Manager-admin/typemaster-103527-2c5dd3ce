@@ -263,8 +263,14 @@ function getRandomTestText() {
   return texts[Math.floor(Math.random() * texts.length)];
 }
 
-// PUBLIC_INTERFACE
-function TypingTest({ onComplete }) {
+/** 
+ * TypingTest - Enhanced to provide audio feedback on:
+ * - Soft tap on keystroke
+ * - Error buzzer when mistake made
+ * - Chime on test completion
+ * - Honors global soundEnabled
+ */
+function TypingTest({ onComplete, soundEnabled }) {
   const [testText, setTestText] = useState(getRandomTestText());
   const [started, setStarted] = useState(false);
   const [input, setInput] = useState("");
@@ -273,6 +279,40 @@ function TypingTest({ onComplete }) {
   const [done, setDone] = useState(false);
   const [startTime, setStartTime] = useState(null);
   const inputRef = useRef(null);
+
+  // Sound audio elements & helpers
+  const tapRef = useRef(null);
+  const chimeRef = useRef(null);
+  const buzzerRef = useRef(null);
+
+  const playSound = useCallback((type) => {
+    if (!soundEnabled) return;
+    switch(type) {
+      case "tap":
+        if (tapRef.current) {
+          tapRef.current.currentTime = 0;
+          tapRef.current.volume = 0.25;
+          tapRef.current.play();
+        }
+        break;
+      case "chime":
+        if (chimeRef.current) {
+          chimeRef.current.currentTime = 0;
+          chimeRef.current.volume = 0.70;
+          chimeRef.current.play();
+        }
+        break;
+      case "buzzer":
+        if (buzzerRef.current) {
+          buzzerRef.current.currentTime = 0;
+          buzzerRef.current.volume = 0.45;
+          buzzerRef.current.play();
+        }
+        break;
+      default:
+        break;
+    }
+  }, [soundEnabled]);
 
   useEffect(() => {
     if (started && !done && timeLeft > 0) {
@@ -284,10 +324,13 @@ function TypingTest({ onComplete }) {
       setDone(true);
       if (timer) clearTimeout(timer);
     }
+    // eslint-disable-next-line
   }, [started, timeLeft, done]);
-
+  
+  // Play chime on completion
   useEffect(() => {
-    if (done) {
+    if (done && started) {
+      playSound("chime");
       const stats = calculateStats(testText, input, 60 - timeLeft);
       onComplete && onComplete({
         ...stats,
@@ -298,14 +341,27 @@ function TypingTest({ onComplete }) {
     }
     // eslint-disable-next-line
   }, [done]);
-
+  
+  // Key tap & error: On input change, play tap, and play buzzer on mistake
   function handleChange(e) {
+    const val = e.target.value;
+    // Only play tap if length increases or backspace/replace
+    if (val.length > input.length || val.length < input.length) {
+      playSound("tap");
+    }
+    // Play buzzer if newly typed char is incorrect
+    if (
+      val.length === input.length + 1 && // next typed
+      testText[val.length - 1] !== val[val.length - 1]
+    ) {
+      playSound("buzzer");
+    }
     if (!started) {
       setStarted(true);
       setStartTime(new Date());
     }
-    setInput(e.target.value);
-    if (e.target.value.length >= testText.length) setDone(true);
+    setInput(val);
+    if (val.length >= testText.length) setDone(true);
   }
 
   function handleRestart() {
@@ -337,6 +393,11 @@ function TypingTest({ onComplete }) {
 
   return (
     <div className="typingtest-container">
+      {/* Audio elements; will not be visible */}
+      <audio src="/sound-tap.mp3" preload="auto" ref={tapRef} />
+      <audio src="/sound-chime.mp3" preload="auto" ref={chimeRef} />
+      <audio src="/sound-buzzer.mp3" preload="auto" ref={buzzerRef} />
+
       <TestStats
         testText={testText}
         input={input}
